@@ -4,12 +4,15 @@ class Cell:
     def __init__(self, id):
         self.id = id
         self.values = []
+        self.neighbors = []
 
     def add_value(self, number):
         self.values.append(number)
 
     def get_values(self):
         return self.values
+
+    
     
 
 class Board:
@@ -23,36 +26,43 @@ class Board:
 
         rows = []
 
-        row_1 = [Cell("A11"), Cell("A12" ) , Cell("A13") , Cell("A14"), Cell("A15"), Cell("A16"), Cell("A17"), Cell("A18"), Cell("A19")]
+        row_1 = [Cell("A11"), Cell("A12" ) , Cell("A13") , Cell("B14"), Cell("B15"), Cell("B16"), Cell("C17"), Cell("C18"), Cell("C19")]
         rows.append(row_1)
         
-        row_2 = [Cell("B11"), Cell("B12" ) , Cell("B13") , Cell("B14"), Cell("B15"), Cell("B16"), Cell("B17"), Cell("B18"), Cell("B19")]
+        row_2 = [Cell("A21"), Cell("A22" ) , Cell("A23") , Cell("B24"), Cell("B25"), Cell("B26"), Cell("C27"), Cell("C28"), Cell("C29")]
         rows.append(row_2)
 
-        row_3 = [Cell("C11"), Cell("C12" ) , Cell("C13") , Cell("C14"), Cell("C15"), Cell("C16"), Cell("C17"), Cell("C18"), Cell("C19")]
+        row_3 = [Cell("A31"), Cell("A32" ) , Cell("A33") , Cell("B34"), Cell("B35"), Cell("B36"), Cell("C37"), Cell("C38"), Cell("C39")]
         rows.append(row_3)
         
-        row_4 = [Cell("D11"), Cell("D12" ) , Cell("D13") , Cell("D14"), Cell("D15"), Cell("D16"), Cell("D17"), Cell("D18"), Cell("D19")]
+        row_4 = [Cell("D41"), Cell("D42" ) , Cell("D43") , Cell("E44"), Cell("E45"), Cell("E46"), Cell("F47"), Cell("F48"), Cell("F49")]
         rows.append(row_4)
 
-        row_5 = [Cell("E11"), Cell("E12" ) , Cell("E13") , Cell("E14"), Cell("E15"), Cell("E16"), Cell("E17"), Cell("E18"), Cell("E19")]
+        row_5 = [Cell("D51"), Cell("D52" ) , Cell("D53") , Cell("E54"), Cell("E55"), Cell("E56"), Cell("F57"), Cell("F58"), Cell("F59")]
         rows.append(row_5)
         
-        row_6 = [Cell("F11"), Cell("F12" ) , Cell("F13") , Cell("F14"), Cell("F15"), Cell("F16"), Cell("F17"), Cell("F18"), Cell("F19")]
+        row_6 = [Cell("D61"), Cell("D62" ) , Cell("D63") , Cell("E64"), Cell("E65"), Cell("E66"), Cell("F67"), Cell("F68"), Cell("F69")]
         rows.append(row_6)
 
-        row_7 = [Cell("G11"), Cell("G12" ) , Cell("G13") , Cell("G14"), Cell("G15"), Cell("G16"), Cell("G17"), Cell("G18"), Cell("G19")]
+        row_7 = [Cell("G71"), Cell("G72" ) , Cell("G73") , Cell("H74"), Cell("H75"), Cell("H76"), Cell("I77"), Cell("I78"), Cell("I79")]
         rows.append(row_7)
         
-        row_8 = [Cell("H11"), Cell("H12" ) , Cell("H13") , Cell("H14"), Cell("H15"), Cell("H16"), Cell("H17"), Cell("H18"), Cell("H19")]
+        row_8 = [Cell("G81"), Cell("G82" ) , Cell("G83") , Cell("H84"), Cell("H85"), Cell("H86"), Cell("I87"), Cell("I88"), Cell("I89")]
         rows.append(row_8)
 
-        row_9 = [Cell("I11"), Cell("I12" ) , Cell("I13") , Cell("I14"), Cell("I15"), Cell("I16"), Cell("I17"), Cell("I18"), Cell("I19")]
+        row_9 = [Cell("G91"), Cell("G92" ) , Cell("G93") , Cell("H94"), Cell("H95"), Cell("H96"), Cell("I97"), Cell("I98"), Cell("I99")]
         rows.append(row_9)
        
         
 
         self.board = [[y for y in row] for row in rows]
+
+    def __len__(self):
+        return 9
+
+    def __getitem__(self, tup):
+        y, x = tup
+        return self.board[y][x]
 
     def fill_initial_board(self, str_board):
         
@@ -73,18 +83,69 @@ class Board:
             for col in len(self.board[0]):
                 print(self.board[row][col].get_values)
 
+    def find_neighbors(self , box , row , col):
+
+        neighbors = []
+        
+        for i in range(len(self)):
+            for j in range(len(self)):
+                if (self.board[i][j].id[0] == box and (self.board[i][j].id[1] != row or self.board[i][j].id[2] != col)):
+                    neighbors.append(self.board[i][j])
+                elif(self.board[i][j].id[0] != box and self.board[i][j].id[1] == row):
+                    neighbors.append(self.board[i][j])
+                elif(self.board[i][j].id[0] != box and self.board[i][j].id[2] == col):
+                    neighbors.append(self.board[i][j])
+        
+        r = int(row)
+
+        c = int(col)
+
+        self.board[r][c].neighbors = neighbors
+
+        return neighbors
 
 def main():
 
     start_board = Board()
 
+    print(len(start_board))
+
+    cell = start_board[0,0]
+
+    
+
+    neigh = start_board.find_neighbors(cell.id[0] , cell.id[1], cell.id[2])
+
+    #cell.neighbors = neigh
+
+
+    print(len(cell.neighbors))
+
+#Check neighbors
+
     filled_board = start_board.fill_initial_board("5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....")
 
-    for i in range(len(filled_board)):
-        for j in range(len(filled_board[0])):
-            print(filled_board[i][j].get_values()),
-        print("")
 
+
+    count = 0
+    for i in range(len(filled_board)):
+        if (count % 3 == 0):
+            print("==============================================================")
+        count = count + 1
+        count_col = 0
+        for j in range(len(filled_board[0])):
+            
+            if (count_col % 3 == 0):
+                print(" | "),
+            if (len(filled_board[i][j].get_values()) > 0):
+                print(filled_board[i][j].get_values()),
+            else:
+                newl = ['0']
+                print(newl),
+            count_col = count_col + 1
+            
+        print("")
+    print("==============================================================")
     return
 
 main()
