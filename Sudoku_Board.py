@@ -3,6 +3,7 @@ class Cell:
 
     def __init__(self, id):
         self.id = id
+        self.cur_val = 0
         self.values = []
         self.neighbors = []
 
@@ -11,6 +12,10 @@ class Cell:
 
     def get_values(self):
         return self.values
+
+    def set_current(self, number):
+        self.cur_val = number
+    
 
     
     
@@ -72,7 +77,7 @@ class Board:
             row = count / 9
             col = count % 9
             if(c != "."):
-                self.board[row][col].add_value(c)
+                self[row,col].set_current(c)
             count = count + 1
         
         return self.board
@@ -84,11 +89,14 @@ class Board:
                 print(self.board[row][col].get_values)
 
     def find_neighbors(self , box , row , col):
+        #modify this to find all neighbors for all cells or do it in the main 
 
         neighbors = []
         
+        
         for i in range(len(self)):
             for j in range(len(self)):
+
                 if (self.board[i][j].id[0] == box and (self.board[i][j].id[1] != row or self.board[i][j].id[2] != col)):
                     neighbors.append(self.board[i][j])
                 elif(self.board[i][j].id[0] != box and self.board[i][j].id[1] == row):
@@ -96,36 +104,59 @@ class Board:
                 elif(self.board[i][j].id[0] != box and self.board[i][j].id[2] == col):
                     neighbors.append(self.board[i][j])
         
-        r = int(row)
+        r = int(row) - 1
+        c = int(col) - 1
 
-        c = int(col)
-
-        self.board[r][c].neighbors = neighbors
+  
+        self[r,c].neighbors = neighbors
 
         return neighbors
+
+    def initial_values(self, neighbors, cell):
+
+        all_poss = [1,2,3,4,5,6,7,8,9]
+        neigh_values = []
+
+        #loop through neighbors and append their values to list
+        for i in neighbors: # i is a cell
+            
+            if (i.cur_val != 0):
+                
+                neigh_values.append(i.cur_val) #gives all neighbor values
+            
+        #compare 2 lists and set values = to what missing from neighbors
+            final_list = (list(list(set(all_poss)-set(neigh_values)) + list(set(neigh_values)-set(all_poss))))
+
+            cell.values = final_list
+
+        return cell.values
+
+
 
 def main():
 
     start_board = Board()
 
-    print(len(start_board))
+    #Initialize all neighbors
+    for i in range(len(start_board)-1):
+        for j in range(len(start_board)-1):
+             cell = start_board[i,j]
+             neigh = start_board.find_neighbors(cell.id[0] , cell.id[1], cell.id[2])
+             filled_board = start_board.fill_initial_board("5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....")
+             final = start_board.initial_values(neigh, cell)
 
-    cell = start_board[0,0]
+             print(final)
 
-    
-
-    neigh = start_board.find_neighbors(cell.id[0] , cell.id[1], cell.id[2])
-
-    #cell.neighbors = neigh
-
+    #Check neighbors
+    """
+    cell = start_board[4,4]
+    for i in cell.neighbors:
+        print(i.id),
 
     print(len(cell.neighbors))
+    """
 
-#Check neighbors
-
-    filled_board = start_board.fill_initial_board("5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....")
-
-
+    
 
     count = 0
     for i in range(len(filled_board)):
@@ -137,11 +168,8 @@ def main():
             
             if (count_col % 3 == 0):
                 print(" | "),
-            if (len(filled_board[i][j].get_values()) > 0):
-                print(filled_board[i][j].get_values()),
-            else:
-                newl = ['0']
-                print(newl),
+            print(filled_board[i][j].cur_val),
+           
             count_col = count_col + 1
             
         print("")
