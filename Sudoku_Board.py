@@ -119,33 +119,51 @@ class Board:
 
         #loop through neighbors and append their values to list
         for i in neighbors: # i is a cell
-            
-            if (i.cur_val != 0):
-                
-                neigh_values.append(i.cur_val) #gives all neighbor values
+            val = int(i.cur_val)
+            if (val in all_poss):
+                all_poss.remove(val) #gives all neighbor values
             
         #compare 2 lists and set values = to what missing from neighbors
-            final_list = (list(list(set(all_poss)-set(neigh_values)) + list(set(neigh_values)-set(all_poss))))
 
-            cell.values = final_list
+        cell.values = all_poss
+
+      
 
         return cell.values
 
 
+    #loop through cells, find cells with no curr_val and less possible
+    def find_less_poss(self): 
 
+        min_len = 10
+        min_cell = self[0,0]
+        for i in range(len(self)):
+            for j in range(len(self)):
+                if (self[i,j].cur_val == 0 and len(self[i,j].values) < min_len):
+                    min_len = len(self[i,j].values)
+                    min_cell = self[i,j]
+
+        return min_cell
 def main():
+
 
     start_board = Board()
 
     #Initialize all neighbors
-    for i in range(len(start_board)-1):
-        for j in range(len(start_board)-1):
+    for i in range(len(start_board)):
+        for j in range(len(start_board)):
              cell = start_board[i,j]
              neigh = start_board.find_neighbors(cell.id[0] , cell.id[1], cell.id[2])
              filled_board = start_board.fill_initial_board("5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....")
              final = start_board.initial_values(neigh, cell)
 
              print(final)
+
+    min_cell = start_board.find_less_poss()
+
+    print(min_cell.id)
+
+      
 
     #Check neighbors
     """
