@@ -1,3 +1,5 @@
+from random import randrange
+
 
 class Cell:
 
@@ -80,7 +82,7 @@ class Board:
                 self[row,col].set_current(c)
             count = count + 1
         
-        return self.board
+        return self
 
     def board_pretty_print(self):
 
@@ -144,6 +146,19 @@ class Board:
                     min_cell = self[i,j]
 
         return min_cell
+
+
+    def board_is_solved(self):
+        
+        for i in range(len(self)):
+            for j in range(len(self)):
+                if (self[i,j].cur_val == 0 ):
+                    return False
+        
+        return True
+
+    
+
 def main():
 
 
@@ -155,43 +170,42 @@ def main():
              cell = start_board[i,j]
              neigh = start_board.find_neighbors(cell.id[0] , cell.id[1], cell.id[2])
              filled_board = start_board.fill_initial_board("5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....")
-             final = start_board.initial_values(neigh, cell)
+             filled_board.initial_values(neigh, cell)
 
-             print(final)
+    counter = 0
 
-    min_cell = start_board.find_less_poss()
+    while(not filled_board.board_is_solved()):
+        #find less values
+        min_cell = filled_board.find_less_poss()
+        values = min_cell.values
 
-    print(min_cell.id)
+        #find number to assign
+        number = randrange(len(values))
+        num_val = values[number]
+        min_cell.set_current(num_val)
 
-      
+        #loop through neighbors and remove that value
+        for n_cell in min_cell.neighbors:
+            if(num_val in n_cell.values):
+                n_cell.values.remove(num_val)
 
-    #Check neighbors
-    """
-    cell = start_board[4,4]
-    for i in cell.neighbors:
-        print(i.id),
-
-    print(len(cell.neighbors))
-    """
-
-    
 
     count = 0
     for i in range(len(filled_board)):
         if (count % 3 == 0):
-            print("==============================================================")
+            print("===============================")
         count = count + 1
         count_col = 0
-        for j in range(len(filled_board[0])):
+        for j in range(len(filled_board)):
             
             if (count_col % 3 == 0):
                 print(" | "),
-            print(filled_board[i][j].cur_val),
+            print(filled_board[i,j].cur_val),
            
             count_col = count_col + 1
             
         print("")
-    print("==============================================================")
+    print("===============================")
     return
 
 main()
