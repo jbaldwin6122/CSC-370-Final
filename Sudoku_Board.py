@@ -157,7 +157,35 @@ class Board:
         
         return True
 
+
+    def simple_AC3_min_val(self):
+
+        while(not self.board_is_solved()):
+            print("hi")
+            #find less values
+            min_cell = self.find_less_poss()
+            values = min_cell.values
+
+            #find number to assign
+            number = randrange(len(values))
+            num_val = values[number]
+            min_cell.set_current(num_val)
+
+            #loop through neighbors and remove that value
+            for n_cell in min_cell.neighbors:
+                if(num_val in n_cell.values):
+                    n_cell.values.remove(num_val)
+
+    #Create an "is consistent" function
+
     
+        def is_allowed(cell , value):
+
+            for i in cell.neighbors:
+                if (i.cur_val == value):
+                    return False
+            
+            return True
 
 def main():
 
@@ -169,7 +197,7 @@ def main():
         for j in range(len(start_board)):
              cell = start_board[i,j]
              neigh = start_board.find_neighbors(cell.id[0] , cell.id[1], cell.id[2])
-             filled_board = start_board.fill_initial_board("........7.1....893.......244.781...5.23.4...1......3.....9.5.3.7....4...9.4.2..1.")
+             filled_board = start_board.fill_initial_board("5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....")
              final = filled_board.initial_values(neigh, cell)
              #Easy Puzzles
              #5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....
@@ -179,26 +207,17 @@ def main():
              #1........8..2.4.........14.58....7..4...5921..2.....68.....23....7936...94.....5.
              #.8.......9.....6.4..6..817.3...71..8..5.2.46....3..5.7..29.....5.....9...19..7...
              #........7.1....893.......244.781...5.23.4...1......3.....9.5.3.7....4...9.4.2..1.
+
+             #Medium Puzzles
+             #.....4.....12....9.....5.6..59....81...8.32...7.........4.92.....8.4....36......2
+             #.2....9.......678.34...9..29....8.7....3...41.38.......1.8....6...7...5......1...
              
              print(final)
 
     counter = 0
 
-    while(not filled_board.board_is_solved()):
-        print("hi")
-        #find less values
-        min_cell = filled_board.find_less_poss()
-        values = min_cell.values
-
-        #find number to assign
-        number = randrange(len(values))
-        num_val = values[number]
-        min_cell.set_current(num_val)
-
-        #loop through neighbors and remove that value
-        for n_cell in min_cell.neighbors:
-            if(num_val in n_cell.values):
-                n_cell.values.remove(num_val)
+    
+    filled_board.simple_AC3_min_val()
 
 
     count = 0
