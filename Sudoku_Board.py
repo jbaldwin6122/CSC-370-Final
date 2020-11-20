@@ -88,7 +88,7 @@ class Board:
             row = count / 9
             col = count % 9
             if(c != "."):
-                self[row,col].set_current(c)
+                self[row,col].set_current(int(c))
             count = count + 1
         
         return self
@@ -188,7 +188,7 @@ class Board:
     #Create an "is consistent" function
 
    
-        
+    
 
     def backtrack_with_min_val(self):
         #Check if it solved
@@ -209,17 +209,17 @@ class Board:
                # for n_cell in min_cell.neighbors:
                #     if(i in n_cell.values):
                #         n_cell.values.remove(i)
-                contraint_propagation(min_cell, i , 0)
+                #contraint_propagation(min_cell, i , 0)
             
                 #Recursive call
                 result = self.backtrack_with_min_val()
 
                 
 
-                if(result):
+                if(result != False):
                     return result
 
-                contraint_propagation(min_cell, i , 1)
+                #contraint_propagation(min_cell, i , 1)
                # for n_cell in min_cell.neighbors:
                 #    n_cell.values.append(i)
                 #min_cell.values.remove(i)
@@ -236,6 +236,9 @@ def is_allowed(cell , value):
             
     return True
 
+def solve_back(board):
+    return board.backtrack_with_min_val()
+
 def main():
 
 
@@ -246,7 +249,7 @@ def main():
         for j in range(len(start_board)):
              cell = start_board[i,j]
              neigh = start_board.find_neighbors(cell.id[0] , cell.id[1], cell.id[2])
-             filled_board = start_board.fill_initial_board("..53.....8......2..7..1.5..4....53...1..7...6..32...8..6.5....9..4....3......97..")
+             filled_board = start_board.fill_initial_board(".....6....59.....82....8....45........3........6..3.54...325..6..................")
              final = filled_board.initial_values(neigh, cell)
              #Easy Puzzles
              #5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....
@@ -268,7 +271,7 @@ def main():
              #Very Difficult Sudoku
              #.......39....1...5..3..58....8..9..6.7..2....1..4.......9..8.5..2....6..4..7.....   ----> Golden Nugget
              #1.......2.9.4...5...6...7...5.9.3.......7.......85..4.7.....6...3...9.8...2.....1   ----> Easter Monster
-             #4...3.......6..8..........1....5..9..8....6...7.2........1.27..5.3....4.9........
+             #4...3.......6..8..........1....5..9..8....6...7.2........1.27..5.3....4.9........   ----> 699 seconds
 
              #Evil Puzzles
              #.2.....7....5...4....1..........35...9..7..........1.81.5...6..4...2.......8.....   ----> 13 Seconds
@@ -293,7 +296,7 @@ def main():
    # print("Naive AC-3 End Time is" , end - start)
 
     start = time.time()
-    filled_board.backtrack_with_min_val()
+    solve_back(filled_board)
     end = time.time()
 
     print("Backtracking End Time is" , end - start)
