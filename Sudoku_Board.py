@@ -1,5 +1,5 @@
 from random import randrange
-
+import time
 
 class Cell:
 
@@ -19,7 +19,16 @@ class Cell:
         self.cur_val = number
     
 
-    
+def contraint_propagation(cell, value, flag):
+
+    if (flag == 0):
+        for n_cell in cell.neighbors:
+                if(value in n_cell.values):
+                    n_cell.values.remove(value)
+        
+    else:
+        for n_cell in cell.neighbors:
+            n_cell.values.append(value)
     
 
 class Board:
@@ -178,14 +187,54 @@ class Board:
 
     #Create an "is consistent" function
 
-    
-        def is_allowed(cell , value):
+   
+        
 
-            for i in cell.neighbors:
-                if (i.cur_val == value):
-                    return False
+    def backtrack_with_min_val(self):
+        #Check if it solved
+        if (self.board_is_solved()):
+            #print(self[8,8].cur_val)
             
             return True
+
+        #find the cell with least possible values
+        min_cell = self.find_less_poss()
+
+        #Loop through values
+        for i in min_cell.values:
+            if(is_allowed(min_cell, i)):
+                min_cell.set_current(int(i))
+
+                #remove that value as possible for the neighbors
+               # for n_cell in min_cell.neighbors:
+               #     if(i in n_cell.values):
+               #         n_cell.values.remove(i)
+                contraint_propagation(min_cell, i , 0)
+            
+                #Recursive call
+                result = self.backtrack_with_min_val()
+
+                
+
+                if(result):
+                    return result
+
+                contraint_propagation(min_cell, i , 1)
+               # for n_cell in min_cell.neighbors:
+                #    n_cell.values.append(i)
+                #min_cell.values.remove(i)
+                min_cell.set_current(0)
+            
+        
+        return False
+
+def is_allowed(cell , value):
+
+    for i in cell.neighbors:
+        if (i.cur_val == value):
+            return False
+            
+    return True
 
 def main():
 
@@ -197,7 +246,7 @@ def main():
         for j in range(len(start_board)):
              cell = start_board[i,j]
              neigh = start_board.find_neighbors(cell.id[0] , cell.id[1], cell.id[2])
-             filled_board = start_board.fill_initial_board("5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....")
+             filled_board = start_board.fill_initial_board("..53.....8......2..7..1.5..4....53...1..7...6..32...8..6.5....9..4....3......97..")
              final = filled_board.initial_values(neigh, cell)
              #Easy Puzzles
              #5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....
@@ -212,13 +261,42 @@ def main():
              #.....4.....12....9.....5.6..59....81...8.32...7.........4.92.....8.4....36......2
              #.2....9.......678.34...9..29....8.7....3...41.38.......1.8....6...7...5......1...
              
-             print(final)
+
+             #Hard Puzzles
+             #.....6....59.....82....8....45........3........6..3.54...325..6..................
+
+             #Very Difficult Sudoku
+             #.......39....1...5..3..58....8..9..6.7..2....1..4.......9..8.5..2....6..4..7.....   ----> Golden Nugget
+             #1.......2.9.4...5...6...7...5.9.3.......7.......85..4.7.....6...3...9.8...2.....1   ----> Easter Monster
+             #4...3.......6..8..........1....5..9..8....6...7.2........1.27..5.3....4.9........
+
+             #Evil Puzzles
+             #.2.....7....5...4....1..........35...9..7..........1.81.5...6..4...2.......8.....   ----> 13 Seconds
+             #8..........36......7..9.2...5...7.......457.....1...3...1....68..85...1..9....4..   ----> 17 Seconds
+             #.....5.8....6.1.43..........1.5........1.6...3.......553.....61........4.........   ----> Norvig 1439 seconds, for us 0.06
+             #..53.....8......2..7..1.5..4....53...1..7...6..32...8..6.5....9..4....3......97..
+
+
+            # print(final)
 
     counter = 0
 
-    
-    filled_board.simple_AC3_min_val()
 
+
+
+
+
+   # start = time.time()
+   # filled_board.simple_AC3_min_val()
+   # end = time.time()
+
+   # print("Naive AC-3 End Time is" , end - start)
+
+    start = time.time()
+    filled_board.backtrack_with_min_val()
+    end = time.time()
+
+    print("Backtracking End Time is" , end - start)
 
     count = 0
     for i in range(len(filled_board)):
