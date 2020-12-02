@@ -1,7 +1,15 @@
+import random
+
 from random import randrange
 import time
 import collections
 from collections import Counter
+import copy
+
+"""
+Cell object that represents each square in a Sudoku puzzle
+
+"""
 
 class Cell:
 
@@ -21,40 +29,10 @@ class Cell:
         self.cur_val = number
 
     
-    
-
-def contraint_propagation(cell, value, flag):
-
-    if (flag == 0):
-        for n_cell in cell.neighbors:
-                if(value in n_cell.values):
-                    n_cell.values.remove(value)
         
-    else:
-        for n_cell in cell.neighbors:
-            n_cell.values.append(value)
-            
-
-def least_constr_val(cell):
-
-    lista = []
-
-    for i in cell.values:
-        lista.append(i)
-        for neigh in cell.neighbors:
-            if (i in neigh.values):
-                lista.append(i)
-            
-
-    counts = collections.Counter(lista)
-    
-    lista = sorted(lista, key=lambda x: counts[x])
-   
-
-    cell.values = set(lista)
-
-    return cell
-        
+"""
+Board object that represents a Sudoku puzzle. It includes cells and various functions.
+"""
 
 class Board:
 
@@ -248,7 +226,7 @@ class Board:
 
         #Loop through values
         for i in min_cell.values:
-            #if(is_allowed(min_cell, i)):
+            if(is_allowed(min_cell, i)):
                 min_cell.set_current(int(i))
 
                 #remove that value as possible for the neighbors
@@ -276,6 +254,42 @@ class Board:
         
         return False
 
+"""
+    End of the Board class, beggining of independent methods
+"""
+
+def contraint_propagation(cell, value, flag):
+
+    if (flag == 0):
+        for n_cell in cell.neighbors:
+                if(value in n_cell.values):
+                    n_cell.values.remove(value)
+        
+    else:
+        for n_cell in cell.neighbors:
+            n_cell.values.append(value)
+            
+
+def least_constr_val(cell):
+
+    lista = []
+
+    for i in cell.values:
+        lista.append(i)
+        for neigh in cell.neighbors:
+            if (i in neigh.values):
+                lista.append(i)
+            
+
+    counts = collections.Counter(lista)
+    
+    lista = sorted(lista, key=lambda x: counts[x])
+   
+
+    cell.values = set(lista)
+
+    return cell
+
 def is_allowed(cell , value):
 
     for i in cell.neighbors:
@@ -287,6 +301,55 @@ def is_allowed(cell , value):
 def solve_back(board):
     return board.backtrack_with_min_val(board[0,0])
 
+def non_empty_squares(board):
+
+    non_empty_cells = []
+
+    for i in range(9):
+        for j in range(9):
+            if (board[i,j].cur_val != 0):
+                non_empty_cells.append(board[i,j])
+    
+    return non_empty_cells
+
+def sudoku_generator(board):
+    
+    non_empty_cells = non_empty_squares(board)
+    num_non_empty = len(non_empty_cells)
+
+    rounds = 5
+
+    while (round > 0 and  num_non_empty > 17):
+
+        cur_cell = random.choice(non_empty_cells)
+
+        non_empty_cells.remove(cur_cell)
+
+        num_non_empty -= 1
+        value_to_delete = cur_cell.cur_val
+
+        cur_cell.cur_val = "."
+
+        if not solve_back(board):
+            rounds -= 1
+            cur_cell.cur_val = value_to_delete
+            num_non_empty += 1
+
+    return board
+    
+
+def read_sudoku(board):
+
+    grid = ""
+
+    for i in range(9):
+        for j in range(9):
+            grid = grid + str(board[i,j].cur_val)
+
+    return grid
+
+
+
 def main():
 
 
@@ -297,7 +360,7 @@ def main():
         for j in range(len(start_board)):
              cell = start_board[i,j]
              neigh = start_board.find_neighbors(cell.id[0] , cell.id[1], cell.id[2])
-             filled_board = start_board.fill_initial_board("5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....")
+             filled_board = start_board.fill_initial_board("1....7.9..3..2...8..96..5....53..9...1..8...26....4...3......1..4......7..7...3..")
              final = filled_board.initial_values(neigh, cell)
              #Easy Puzzles
              #5..3.6.92.69...15....51.8.....69..2.67...8..99....2.8.....8.5.3..32.7..4.14.3....
@@ -322,10 +385,10 @@ def main():
              #4...3.......6..8..........1....5..9..8....6...7.2........1.27..5.3....4.9........   ----> 2 seconds
 
              #Evil Puzzles
-             #.2.....7....5...4....1..........35...9..7..........1.81.5...6..4...2.......8.....   ----> 20 seconds
-             #8..........36......7..9.2...5...7.......457.....1...3...1....68..85...1..9....4..   ----> 15 seconds ----> 8
+             #.2.....7....5...4....1..........35...9..7..........1.81.5...6..4...2.......8.....   ----> 18-20 seconds
+             #8..........36......7..9.2...5...7.......457.....1...3...1....68..85...1..9....4..   ----> 8
              #.....5.8....6.1.43..........1.5........1.6...3.......553.....61........4.........   ----> Norvig 1439 seconds, for us 0.06
-             
+             #..3......8.946.7.22...186.......6.7...8...4...7.8.......294....54.6.328.7......2..
 
 
             # print(final)
@@ -362,8 +425,9 @@ def main():
     #filled_board.simple_AC3_min_val()
     solve_back(filled_board)
     end_back = time.time()
-
     print("Backtracking End Time is" , end_back - start_back)
+
+    print("INITIAL BOARD")
 
     count = 0
     for i in range(len(filled_board)):
@@ -382,8 +446,65 @@ def main():
         print("")
     print("===============================")
 
+    """
+
+    sudoku_list = []
+    for i in range(100):
+        filled_copy = copy.deepcopy(filled_board) 
+        new_board = sudoku_generator(filled_copy)
+        grid = read_sudoku(new_board)
+        sudoku_list.append(grid)
+
+   
+
+    print(len(sudoku_list))
+    sudoku_list = set(sudoku_list)
+    print(len(sudoku_list))
+
+    with open('Sudokus.txt', 'w') as f:
+        for item in sudoku_list:
+            f.write("%s\n" % item)
+    
+    print(grid)
+    
+    
+    new_start = Board()
 
 
+    for i in range(len(new_start)):
+        for j in range(len(new_start)):
+             cell = new_start[i,j]
+             neigh = new_start.find_neighbors(cell.id[0] , cell.id[1], cell.id[2])
+             filled_board = new_start.fill_initial_board(grid)
+             final = filled_board.initial_values(neigh, cell)
+
+   # print("Backtracking End Time is" , end_back - start_back)
+
+    solve_back(filled_board)
+
+    print("LAST ONE PRINTED")
+
+    count = 0
+    for i in range(len(filled_board)):
+        if (count % 3 == 0):
+            print("===============================")
+        count = count + 1
+        count_col = 0
+        for j in range(len(filled_board)):
+            
+            if (count_col % 3 == 0):
+                print(" | "),
+            print(filled_board[i,j].cur_val),
+           
+            count_col = count_col + 1
+            
+        print("")
+    print("===============================")
+    
+    new_board = sudoku_generator(filled_board)
+    print("Backtracking End Time is" , end_back - start_back)
+
+    """
     return
 
 main()
